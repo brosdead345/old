@@ -1,0 +1,244 @@
+EXPERIMENT 3
+Server program
+import socket
+
+def server_program():
+    host = socket.gethostname()
+    port = 5003
+    server_socket = socket.socket()
+    server_socket.bind((host, port))
+    server_socket.listen(2)
+    conn, address = server_socket.accept()
+
+    while True:
+        data = conn.recv(1024).decode()
+        if not data:
+            conn.close()
+            break
+        print("Received message: " + data)
+        response = input('Enter response: ')
+        conn.send(response.encode())
+
+if __name__ == '__main__':
+    server_program()
+
+
+Client program
+import socket
+
+def client_program():
+    host = socket.gethostname()
+    port = 5003
+    client_socket = socket.socket()
+    client_socket.connect((host, port))
+
+    message = input("Enter message: ")
+    while message.lower().strip() != 'bye':
+        client_socket.send(message.encode())
+        data = client_socket.recv(1024).decode()
+        print('Received message: ' + data)
+        message = input("Enter message: ")
+
+    client_socket.close()
+
+if __name__ == '__main__':
+    client_program()
+
+output
+Server	Client
+PS E:\SECONDYEAR\cn\exp3> python3 server.py
+Received message: hello
+Enter response: hi
+Received message: hi
+Enter response: yo
+PS E:\SECONDYEAR\cn\exp3>	PS E:\SECONDYEAR\cn\exp3> python3 client.py
+Enter message: hello
+Received message: hi
+Enter message: hi
+Received message: yo
+Enter message: bye
+PS E:\SECONDYEAR\cn\exp3>
+      
+
+EXPERIMENT 4
+Server program
+import socket
+server = socket.socket()
+server.bind(("localhost", 5006))
+server.listen(3)
+print("Server Activated")
+while True:
+    client, address = server.accept()
+    print(str(address) + " is connected.")
+    client_request = client.recv(1024)
+    print('Server received', client_request)
+    filename = client_request
+    f = open(filename, 'rb')
+    l = f.read(1024)
+    client.send(l)
+    f.close()
+    print("File Sent to " + str(address) + " server!")
+server.close()
+
+
+
+
+Client1 program
+import socket
+
+client = socket.socket()
+source = input("Enter desired file: ")
+client.connect(("localhost", 5006))
+client.send(source.encode())
+n = input("Enter new file name: ")
+with open(n, "wb") as f:
+    while True:
+        data = client.recv(1024)
+        if not data:
+            break
+        f.write(data)
+print("File received by client02")
+print("Connection Lost")
+f.close()
+client.close()
+
+
+Client2 program
+import socket
+
+client = socket.socket()
+source = input("Enter desired file: ")
+client.connect(("localhost", 5006))
+client.send(source.encode())
+n = input("Enter new file name: ")
+with open(n, "wb") as f:
+    while True:
+        data = client.recv(1024)
+        if not data:
+            break
+        f.write(data)
+print("File received by client01")
+print("Connection Lost")
+f.close()
+client.close()
+
+
+Server	Client1	Client2
+PS E:\SECONDYEAR\cn\exp4> python3 server.py    
+Server Activated
+('127.0.0.1', 58053) is connected.
+Server received b'hd.bin.txt'
+File Sent to ('127.0.0.1', 58053) server!      
+('127.0.0.1', 58079) is connected.
+Server received b'experi4.bin.txt'
+File Sent to ('127.0.0.1', 58079) server!	PS E:\SECONDYEAR\cn\exp4> python3 client1.py  
+Enter desired file: hd.bin.txt
+Enter new file name: cl1.txt
+File received by client02
+Connection Lost
+PS E:\SECONDYEAR\cn\exp4>	PS E:\SECONDYEAR\cn\exp4> python3 client3.py   
+PS E:\SECONDYEAR\cn\exp4> python3 client2.py   
+Enter desired file: experi4.bin.txt
+Enter new file name: bro.txt
+
+EXPERIMENT 5
+SERVER PROGRAM
+
+ import socket
+port = 5007
+s = socket.socket()
+host = socket.gethostname()
+s.bind((host, port))
+s.listen(5)
+print('Server is listening....')
+
+while True:
+    conn, addr = s.accept()
+    print('Got connection from', addr)
+    data = conn.recv(1024)
+    print('Server received', data)
+    filename = data
+    f = open(filename, 'rb')
+    l = f.read(1024)
+    
+    while l:
+        conn.send(l)
+        print('Sent', repr(l))
+        l = f.read(1024)
+    
+    f.close
+    print('Done sending')
+    conn.close()
+
+CLIENT 1 PROGRAM:
+import socket
+
+s = socket.socket()
+host = socket.gethostname()
+port = 5007
+s.connect((host, port))
+s.send('first.txt'.encode())
+
+with open('recieved_file1.txt', 'wb') as f:
+    print('file opened')
+    while True:
+        data = s.recv(1024).decode()
+        if not data:
+            break
+        print('receiving data...')
+        print('data in received file:')
+        print(data)
+        f.write(data.encode())
+    
+    f.close()
+    print('Successfully got the first file')
+    s.close()
+    print('connection closed')
+
+
+CLIENT 2 PROGRAM:
+import socket
+
+s = socket.socket()
+host = socket.gethostname()
+port = 5007
+s.connect((host, port))
+s.send('second.txt'.encode())
+
+with open('recieved_file2.txt', 'wb') as f:
+    print('file opened')
+    while True:
+        data = s.recv(1024).decode()
+        if not data:
+            break
+        print('receiving data...')
+        print('data in received file:')
+        print(data)
+        f.write(data.encode())
+    
+    f.close()
+    print('Successfully got the second file')
+    s.close()
+    print('connection closed')
+
+
+
+OUTPUT
+PS E:\SECONDYEAR\cn\exp5> python3 server.py    
+Server is listening....
+Got connection from ('172.19.213.46', 64410)   
+Server received b'first.txt'
+Done sending
+Got connection from ('172.19.213.46', 64415)   
+Server received b'second.txt'
+Done sending	PS E:\SECONDYEAR\cn\exp5> python3 client1.py   
+file opened
+Successfully got the first file
+connection closed
+PS E:\SECONDYEAR\cn\exp5>
+	PS E:\SECONDYEAR\cn\exp5> python3 client2.py  
+file opened
+Successfully got the second file
+connection closed
+PS E:\SECONDYEAR\cn\exp5>
+
